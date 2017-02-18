@@ -166,18 +166,47 @@ class CustomPlayer:
                 to pass the project unit tests; you cannot call any other
                 evaluation function directly.
         """
+
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
         # Start Implementing
         # print(game.get_legal_moves())
+
+        if not game.get_legal_moves():
+            value, move = 0.0, (-1, -1)
+            return value, move
+
         if maximizing_player:
-            if self.search_depth >= depth:
-                value, move = max([(self.score(game.forecast_move(move), self), move) for move in game.get_legal_moves()])
+            if depth == 1:
+                valuations = [(self.score(game.forecast_move(move), self), move) for move in game.get_legal_moves()]
+                value, move = max(valuations)
                 return value, move
 
+            valuations = [(self.minimax(game=game.forecast_move(move), depth=depth-1, maximizing_player=False), move)
+                           for move in game.get_legal_moves()]
+
+            last_minimax_result, next_move = max(valuations)
+            value, last_move = last_minimax_result
+
+            # print('\n\n---------\n\n')
+            # print('At depth {}\n{}'.format(depth, game.to_string()))
+            # print('Player is {}'.format(game.active_player))
+            # print('At depth {}, picking move from {}'.format(depth, valuations))
+            # print('We moved {} with value {}'.format(move, value))
+
+            return value, next_move
+
         else: # minimizing_player
-            return "Nothing"
+            if depth == 1:
+                value, move = min([(self.score(game.forecast_move(move), self), move) for move in game.get_legal_moves()])
+                return value, move
+
+            last_minimax_result, next_move = min([(self.minimax(game=game.forecast_move(move), depth=depth-1, maximizing_player=True), move)
+                                             for move in game.get_legal_moves()])
+
+            value, last_move = last_minimax_result
+            return value, next_move
 
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
