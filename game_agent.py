@@ -37,8 +37,8 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    # TODO: finish this function!
-    raise NotImplementedError
+    # Implementing a rudimentary custom score that is the number of moves a player has
+    return float(len([game.get_legal_moves()]))
 
 
 class CustomPlayer:
@@ -125,11 +125,8 @@ class CustomPlayer:
         # immediately if there are no legal moves
 
         try:
-            # The search method call (alpha beta or minimax) should happen in
-            # here in order to avoid timeout. The try/except block will
-            # automatically catch the exception raised by the search method
-            # when the timer gets close to expiring
-            pass
+            value, move = self.minimax(game, depth=1)
+            return move
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
@@ -172,8 +169,16 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Start Implementing
+        # print(game.get_legal_moves())
+        if maximizing_player:
+            if self.search_depth >= depth:
+                value, move = max([(self.score(game.forecast_move(move), self), move) for move in game.get_legal_moves()])
+                return value, move
+
+        else: # minimizing_player
+            return "Nothing"
+
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
